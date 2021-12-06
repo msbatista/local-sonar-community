@@ -7,8 +7,8 @@ This project is a sample of how to run sonar community with branch analysis plug
 Execute the following commands as [root](https://hub.docker.com/_/sonarqube):
 
 ```
-sysctl -w vm.max_map_count=262144
-sysctl -w fs.file-max=65536
+sudo sysctl -w vm.max_map_count=262144
+sudo sysctl -w fs.file-max=65536
 ulimit -n 65536
 ulimit -u 4096
 ```

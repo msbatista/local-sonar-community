@@ -6,7 +6,12 @@ SONAR_PROJECT_KEY=my-project-key-api
 
 PULL_REQUEST_BRANCH=develop 
 PULL_REQUEST_BASE=master
-PULL_REQUEST_KEY=12df5
+PULL_REQUEST_KEY=1
+
+PROVIDER=vsts
+PROJECT=my-super-project
+INSTANCE_URL=https://dev.azure.com/my-super-organization
+RESPOSITORY=my-repository
 
 COVERAGE_REPORT_DIR=MyProject.UnitTests
 
@@ -69,7 +74,11 @@ dotnet sonarscanner begin /k:"$SONAR_PROJECT_KEY" \
     /d:sonar.coverage.exclusions="$COVERAGE_EXCLUSIONS" \
     /d:sonar.pullrequest.key="$PULL_REQUEST_KEY" \
     /d:sonar.pullrequest.branch="$PULL_REQUEST_BRANCH" \
-    /d:sonar.pullrequest.base="$PULL_REQUEST_BASE"
+    /d:sonar.pullrequest.base="$PULL_REQUEST_BASE" \
+    /d:sonar.pullrequest.provider="$PROVIDER" \
+    /d:sonar.pullrequest.vsts.project="$PROJECT"
+    /d:sonar.pullrequest.vsts.instanceUrl="$INSTANCE_URL" \
+    /d:sonar.pullrequest.vsts.respository="$RESPOSITORY"
 
 echo "--------------------------------"
 echo "       Building project         "
