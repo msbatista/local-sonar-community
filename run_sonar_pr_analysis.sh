@@ -72,6 +72,7 @@ dotnet sonarscanner begin /k:"$SONAR_PROJECT_KEY" \
     /d:sonar.login="$SONAR_LOGIN" \
     /d:sonar.cs.opencover.reportsPaths="$COVERAGE_REPORT_DIR/coverage.opencover.xml" \
     /d:sonar.coverage.exclusions="$COVERAGE_EXCLUSIONS" \
+    /d:sonar.exclusions="$EXCLUSIONS" \
     /d:sonar.pullrequest.key="$PULL_REQUEST_KEY" \
     /d:sonar.pullrequest.branch="$PULL_REQUEST_BRANCH" \
     /d:sonar.pullrequest.base="$PULL_REQUEST_BASE" \
