@@ -1,13 +1,4 @@
-# Copyright  2021 Marcelo Silva Batista, silvabatistamarcelo@gmail.com
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-version: "3"
-
+version: '3'
 services:
   portainer:
     image: portainer/portainer
@@ -19,15 +10,16 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
   sonarqube:
-    container_name: sonarqube
+    container_name: sonarqube_container
     image: sonarqube:9.0-community
+    restart: unless-stopped
     depends_on:
-      - db
+      - sonar_sql_server
     networks:
-      - sonarnet
+      - sonar_net
     environment:
-      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
-      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_URL: jdbc:sqlserver://sonar_sql_server:5433/sonar
+      SONAR_JDBC_USERNAME: sa
       SONAR_JDBC_PASSWORD: sonar
       SONAR_WEB_JAVAADDITIONALOPTS: -javaagent:./extensions/plugins/sonarqube-community-branch-plugin.jar=web
       SONAR_CE_JAVAADDITIONALOPTS: -javaagent:./extensions/plugins/sonarqube-community-branch-plugin.jar=ce
@@ -38,24 +30,47 @@ services:
       - ./sonarqube-community-branch-plugin-1.9.0.jar:/opt/sonarqube/lib/common/sonarqube-community-branch-plugin.jar
     ports:
       - 9000:9000
-  db:
-    image: postgres:12
-    container_name: postgres
+    # ulimits:
+    #   nproc: 65535
+    #   nofiles:
+    #     soft: 65536
+    #     hard: 65536    
+  sonar_sql_server:
+    image: mcr.microsoft.com/mssql/server:2019-CU14-ubuntu-20.04
+    container_name: mssql_server
+    restart: unless-stopped
     networks:
-      - sonarnet
+      - sonar_net
+    ports:
+      - 5433:1433
     environment:
-      POSTGRES_USER: sonar
-      POSTGRES_PASSWORD: sonar
+      - SA_PASSWORD=sonar
+      - ACCEPT_EULA=Y
     volumes:
-      - postgresql:/var/lib/postgresql
-      - postgresql_data:/var/lib/postgresql/data
+      - sonar_mssql_data:/var/opt/mssql
+  # reverse_proxy:
+  #   container_name: reverse_proxy
+  #   depends_on:
+  #     - sonarqube_container
+  #   image: nginx
+  #   networks:
+  #     - sonar_net
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   restart: always
+  #   volumes:
+  #     - ./notice/default.conf:/etc/nginx/conf.d/default.conf
+  #     - ./cert/sonarqube.crt:/etc/ssl/certs/sonarqube.crt
+  #     - ./cert/sonar/sonarqube.key:/etc/ssl/private/sonarqube.key
 
 volumes:
   sonarqube_conf:
   sonarqube_data:
-  postgresql:
-  postgresql_data:
   portainer_data:
+  sonar_mssql_data:
   
 networks:
-  sonarnet:
+  sonar_net:
+  public:
+    driver: bridge
